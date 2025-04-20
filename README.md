@@ -1,129 +1,92 @@
-# InMemory - Frontend
+# InMemory Web
 
-## Description du Projet
-InMemory est une plateforme web permettant aux utilisateurs de partager et de voter pour des ressources d'information. Le projet vise à créer une communauté autour de la veille informationnelle.
+Application web pour partager et voter sur des ressources de développement.
 
-### Fonctionnalités Principales
-- Partage de ressources (liens, images, descriptions)
-- Système de vote par équipe
-- Commentaires avec identification visuelle de l'équipe
-- Gestion des équipes multiples par utilisateur
+## Fonctionnalités
 
-## Installation et Configuration
+- Affichage des ressources en grille responsive
+- Système de votes par équipe
+- Commentaires sur les ressources
+- Modal de détail pour chaque ressource
 
-### Prérequis
-- Node.js (version 18 ou supérieure)
-- npm ou yarn
-- Backend Strapi configuré et en cours d'exécution
+## Notes techniques
 
-### Étapes d'Installation
+### Grid Layout
 
-1. **Cloner le projet**
-```bash
-git clone [URL_DU_REPO]
-cd inmemory-web
+La grille de ressources utilise une combinaison de CSS Grid et de media queries pour assurer un affichage stable :
+
+```tsx
+// ResourceGrid.tsx
+<div 
+  className="grid gap-x-8 gap-y-16 sm:gap-x-12 lg:gap-x-16"
+  style={{
+    gridTemplateColumns: `repeat(${
+      screenWidth < 640 ? 1 :
+      screenWidth < 1024 ? 2 :
+      screenWidth < 1440 ? 3 : 4
+    }, minmax(0, 1fr))`
+  }}
+>
 ```
 
-2. **Installer les dépendances**
+Points clés pour une grille stable :
+- Utilisation de `screenWidth` avec `useEffect` pour détecter la largeur réelle
+- Breakpoints adaptés aux tailles d'écran standard
+- Espacement progressif selon la taille d'écran
+- Conteneur centré avec largeur maximale
+
+### Style des cartes
+
+Les cartes suivent un design moderne inspiré d'Usbek & Rica :
+
+```tsx
+// ResourceGridItem.tsx
+<article className="group cursor-pointer max-w-[400px]">
+  <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[1.2rem]">
+    {/* Image ou placeholder */}
+  </div>
+  <div className="space-y-3">
+    <h3 className="text-[1.4rem] font-extrabold">
+      {/* Titre */}
+    </h3>
+    {/* Description et métadonnées */}
+  </div>
+</article>
+```
+
+Caractéristiques des cartes :
+- Largeur maximale fixe de 400px
+- Ratio d'image 16/10
+- Coins arrondis prononcés (1.2rem)
+- Typographie optimisée pour la lecture
+- Espacement vertical généreux
+
+## Installation
+
 ```bash
 npm install
-```
-
-3. **Configuration de l'environnement**
-Créer un fichier `.env.local` à la racine du projet avec :
-```
-NEXT_PUBLIC_STRAPI_API_URL=http://localhost:1337
-```
-
-4. **Lancer le serveur de développement**
-```bash
 npm run dev
 ```
 
-## Structure du Projet
+## Développement
+
+### Structure du projet
 
 ```
 src/
-├── app/
-│   ├── components/
-│   │   ├── resources/
-│   │   │   ├── ResourceCard.tsx
-│   │   │   └── ResourceGrid.tsx
-│   │   ├── teams/
-│   │   └── comments/
-│   ├── types/
-│   │   └── index.ts
-│   ├── page.tsx
-│   ├── layout.tsx
-│   └── globals.css
+  app/
+    components/
+      resources/
+        ResourceGrid.tsx     # Grille principale
+        ResourceGridItem.tsx # Carte individuelle
+        ResourceModal.tsx    # Modal de détail
+    types/
+      index.ts              # Types TypeScript
+    page.tsx                # Page principale
 ```
 
-### Composants Principaux
+### Commandes utiles
 
-1. **ResourceCard**
-   - Affichage d'une ressource individuelle
-   - Affichage des votes par équipe
-   - Affichage des commentaires avec identification visuelle de l'équipe
-
-2. **ResourceGrid**
-   - Grille responsive des ressources
-   - Gestion de l'affichage des ressources par équipe
-
-### Types Principaux
-
-```typescript
-interface Resource {
-  id: string;
-  title: string;
-  url: string;
-  image?: string;
-  description: string;
-  createdAt: Date;
-  author: User;
-}
-
-interface Team {
-  id: string;
-  name: string;
-  color: string;
-  members: User[];
-}
-
-interface Comment {
-  id: string;
-  content: string;
-  resourceId: string;
-  author: User;
-  team: Team;
-  createdAt: Date;
-}
-```
-
-## Configuration de Tailwind CSS
-
-Le projet utilise Tailwind CSS pour le styling. La configuration est gérée via :
-- `tailwind.config.js`
-- `postcss.config.js`
-- `src/app/globals.css`
-
-## Développement
-
-### Commandes Disponibles
-- `npm run dev` : Lance le serveur de développement
-- `npm run build` : Crée une version de production
-- `npm run start` : Lance la version de production
-- `npm run lint` : Exécute les vérifications de linting
-
-### Conventions de Code
-- Utilisation de TypeScript
-- Composants React fonctionnels
-- Styling avec Tailwind CSS
-- Gestion d'état avec React Context (à implémenter)
-
-## Prochaines Étapes
-- [ ] Implémentation de l'authentification
-- [ ] Connexion avec l'API Strapi
-- [ ] Gestion des votes
-- [ ] Système de commentaires
-- [ ] Gestion des équipes
-- [ ] Tests unitaires et d'intégration
+- `npm run dev` : Démarre le serveur de développement
+- `npm run build` : Compile le projet
+- `npm run start` : Démarre le serveur de production
