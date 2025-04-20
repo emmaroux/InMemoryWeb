@@ -1,92 +1,90 @@
 # InMemory Web
 
-Application web pour partager et voter sur des ressources de développement.
+Une application web moderne construite avec Next.js 14, React 18, et Tailwind CSS pour afficher et gérer une grille de ressources.
 
-## Fonctionnalités
+## 🚀 Technologies Utilisées
 
-- Affichage des ressources en grille responsive
-- Système de votes par équipe
-- Commentaires sur les ressources
-- Modal de détail pour chaque ressource
+- **Next.js 14.2.28** - Framework React avec rendu côté serveur
+- **React & React DOM 18.2.0** - Bibliothèque UI
+- **Tailwind CSS 3.4.1** - Framework CSS utilitaire
+- **TypeScript** - Typage statique
+- **Police Geist** - Police système moderne
 
-## Notes techniques
+## 🛠 Installation
 
-### Grid Layout
-
-La grille de ressources utilise une combinaison de CSS Grid et de media queries pour assurer un affichage stable :
-
-```tsx
-// ResourceGrid.tsx
-<div 
-  className="grid gap-x-8 gap-y-16 sm:gap-x-12 lg:gap-x-16"
-  style={{
-    gridTemplateColumns: `repeat(${
-      screenWidth < 640 ? 1 :
-      screenWidth < 1024 ? 2 :
-      screenWidth < 1440 ? 3 : 4
-    }, minmax(0, 1fr))`
-  }}
->
-```
-
-Points clés pour une grille stable :
-- Utilisation de `screenWidth` avec `useEffect` pour détecter la largeur réelle
-- Breakpoints adaptés aux tailles d'écran standard
-- Espacement progressif selon la taille d'écran
-- Conteneur centré avec largeur maximale
-
-### Style des cartes
-
-Les cartes suivent un design moderne inspiré d'Usbek & Rica :
-
-```tsx
-// ResourceGridItem.tsx
-<article className="group cursor-pointer max-w-[400px]">
-  <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[1.2rem]">
-    {/* Image ou placeholder */}
-  </div>
-  <div className="space-y-3">
-    <h3 className="text-[1.4rem] font-extrabold">
-      {/* Titre */}
-    </h3>
-    {/* Description et métadonnées */}
-  </div>
-</article>
-```
-
-Caractéristiques des cartes :
-- Largeur maximale fixe de 400px
-- Ratio d'image 16/10
-- Coins arrondis prononcés (1.2rem)
-- Typographie optimisée pour la lecture
-- Espacement vertical généreux
-
-## Installation
-
+1. Cloner le repository
+2. Installer les dépendances :
 ```bash
 npm install
+```
+3. Lancer le serveur de développement :
+```bash
 npm run dev
 ```
 
-## Développement
+## 📝 Points Techniques Importants
 
-### Structure du projet
+### Configuration de la Police Geist
 
-```
-src/
-  app/
-    components/
-      resources/
-        ResourceGrid.tsx     # Grille principale
-        ResourceGridItem.tsx # Carte individuelle
-        ResourceModal.tsx    # Modal de détail
-    types/
-      index.ts              # Types TypeScript
-    page.tsx                # Page principale
+La police Geist est configurée dans `src/app/layout.tsx` :
+```typescript
+import { GeistSans, GeistMono } from "geist/font";
+
+const geistSans = GeistSans;
+const geistMono = GeistMono;
 ```
 
-### Commandes utiles
+### Structure des Composants
 
-- `npm run dev` : Démarre le serveur de développement
-- `npm run build` : Compile le projet
-- `npm run start` : Démarre le serveur de production
+- `ResourceGrid` - Grille principale affichant les ressources
+- `ResourceGridItem` - Carte individuelle pour chaque ressource
+  - Taille maximale : 300px de large
+  - Hauteur maximale : 140px
+  - Tailles de police optimisées pour la lisibilité
+
+### Données Mock
+
+Les données de test sont importées depuis `./data/mockData` et incluent :
+- Resources
+- Teams
+- Votes
+- Comments
+
+### Thème et Style
+
+- Fond blanc (`bg-white`)
+- Police système Geist pour une meilleure lisibilité
+- Design responsive et moderne
+- Composants optimisés pour les performances
+
+## 🔍 Points d'Attention
+
+1. Toujours utiliser les variables de police Geist :
+   ```typescript
+   className={`${geistSans.variable} ${geistMono.variable}`}
+   ```
+
+2. Les cartes de ressources sont limitées en taille pour une meilleure expérience utilisateur
+
+3. L'application utilise les dernières versions stables des dépendances pour éviter les problèmes de compatibilité
+
+## 📦 Dépendances Principales
+
+```json
+{
+  "next": "^14.2.28",
+  "react": "^18.2.0",
+  "react-dom": "^18.2.0",
+  "geist": "latest"
+}
+```
+
+## 🤝 Contribution
+
+1. Créer une branche pour votre fonctionnalité
+2. Commiter vos changements
+3. Créer une Pull Request
+
+## 📄 License
+
+MIT

@@ -3,9 +3,9 @@ import { mockData } from './data/mockData';
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white">
-      <div className="max-w-[1600px] mx-auto">
-        <h1 className="text-4xl font-bold text-gray-900 px-4 pt-12 pb-8">
+    <main className="min-h-screen bg-gray-100">
+      <div className="px-4 sm:px-8 lg:px-12">
+        <h1 className="text-4xl font-bold text-gray-900 pt-12 pb-8">
           Ressources
         </h1>
         <ResourceGrid 
