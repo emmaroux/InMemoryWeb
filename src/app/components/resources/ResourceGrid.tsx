@@ -37,14 +37,13 @@ export default function ResourceGrid({ resources, teams, votes, comments }: Reso
           }}
         >
           {resources.map((resource) => (
-            <div key={resource.id} className="flex justify-center">
-              <ResourceGridItem
-                resource={resource}
-                teams={teams}
-                votes={votes[resource.id] || {}}
-                onClick={() => setSelectedResource(resource)}
-              />
-            </div>
+            <ResourceGridItem
+              key={resource.id}
+              resource={resource}
+              teams={teams}
+              votes={votes[resource.id] || {}}
+              onClick={() => setSelectedResource(resource)}
+            />
           ))}
         </div>
       </div>

@@ -26,40 +26,40 @@ export default function ResourceGridItem({ resource, teams, votes, onClick }: Re
 
   return (
     <article 
-      className="group cursor-pointer max-w-[400px]"
+      className="group cursor-pointer w-[240px] bg-white hover:shadow-lg transition-shadow duration-300 rounded-[1rem] overflow-hidden"
       onClick={onClick}
     >
-      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[1.2rem] bg-gray-100 mb-5">
+      <div className="relative w-[240px] h-[140px] overflow-hidden bg-gray-100">
         {resource.image ? (
           <Image
             src={resource.image}
             alt={resource.title}
             fill
-            sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 400px"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1440px) 33vw, 25vw"
             className="object-cover transform group-hover:scale-105 transition-transform duration-500"
             priority
           />
         ) : (
           <div className={`w-full h-full ${generatePlaceholderColor()} flex items-center justify-center`}>
-            <span className="text-white text-opacity-30 text-2xl font-bold">
+            <span className="text-white text-2xl font-bold">
               {resource.title.charAt(0)}
             </span>
           </div>
         )}
       </div>
-      <div className="space-y-3">
-        <h3 className="text-[1.4rem] font-extrabold leading-tight group-hover:text-blue-600 transition-colors line-clamp-2">
+      <div className="p-4 space-y-2 border-t border-gray-100">
+        <h3 className="text-[1rem] font-bold leading-tight text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
           {resource.title}
         </h3>
-        <p className="text-[1rem] text-gray-600 leading-normal line-clamp-2">
+        <p className="text-[0.8rem] text-gray-600 leading-relaxed line-clamp-2">
           {resource.description}
         </p>
-        <div className="flex items-center gap-4 pt-2">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">{totalVotes}</span>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-gray-400">
-              <path d="M1 8.25a1.25 1.25 0 112.5 0v7.5a1.25 1.25 0 11-2.5 0v-7.5zM11 3V1.7c0-.268.14-.526.395-.607A2 2 0 0114 3c0 .995-.182 1.948-.514 2.826-.204.54.166 1.174.744 1.174h2.52c1.243 0 2.261 1.01 2.146 2.247a23.864 23.864 0 01-1.341 5.974C17.153 16.323 16.072 17 14.9 17h-3.192a3 3 0 01-1.341-.317l-2.734-1.366A3 3 0 006.292 15H5V8h.963c.685 0 1.258-.483 1.612-1.068a4.011 4.011 0 012.166-1.73c.432-.143.853-.386 1.011-.814.16-.432.248-.9.248-1.388z" />
+        <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center gap-2 text-gray-500">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+              <path d="M7.493 18.75c-.425 0-.82-.236-.975-.632A7.48 7.48 0 016 15.375c0-1.75.599-3.358 1.602-4.634.151-.192.373-.309.6-.397.473-.183.89-.514 1.212-.924a9.042 9.042 0 012.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 00.322-1.672V3a.75.75 0 01.75-.75 2.25 2.25 0 012.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 01-2.649 7.521c-.388.482-.987.729-1.605.729H14.23c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 00-1.423-.23h-.777zM2.331 10.977a11.969 11.969 0 00-.831 4.398 12 12 0 00.52 3.507c.26.85 1.084 1.368 1.973 1.368H4.9c.445 0 .72-.498.523-.898a8.963 8.963 0 01-.924-3.977c0-1.708.476-3.305 1.302-4.666.245-.403-.028-.959-.5-.959H4.25c-.832 0-1.612.453-1.918 1.227z" />
             </svg>
+            <span className="text-sm font-medium">{totalVotes}</span>
           </div>
           <time className="text-sm text-gray-500" dateTime={resource.createdAt.toISOString()}>
             {new Date(resource.createdAt).toLocaleDateString('fr-FR', {
