@@ -68,7 +68,7 @@ export default function Home() {
         // Récupérer les catégories
         setLoadingState('categories');
         try {
-          const categoriesUrl = `${strapiUrl}/api/categories?pagination[page]=1&pagination[pageSize]=100`;
+          const categoriesUrl = `${strapiUrl}/api/categories?pagination[page]=1&pagination[pageSize]=100&populate=resources`;
           const categoriesResponse = await fetch(categoriesUrl, { headers });
           
           if (!categoriesResponse.ok) {

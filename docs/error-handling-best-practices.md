@@ -155,4 +155,35 @@ Utiliser des composants d'erreur distincts avec différents niveaux de sévérit
 Une bonne gestion des erreurs et des états de chargement améliore considérablement l'expérience utilisateur. Elle permet de :
 - Maintenir l'application fonctionnelle même en cas d'erreurs partielles
 - Informer clairement l'utilisateur de l'état du système
-- Faciliter le débogage en isolant les problèmes 
+- Faciliter le débogage en isolant les problèmes
+
+## Erreurs Courantes avec Strapi
+
+### Erreur 500 sur un endpoint
+Si vous recevez une erreur 500 sur un endpoint Strapi, vérifiez :
+
+1. **Structure complète du modèle** :
+   ```
+   src/api/[nom-api]/
+   ├── content-types/
+   │   └── [nom-api]/
+   │       └── schema.json    # Définition du modèle
+   ├── controllers/
+   │   └── [nom-api].js      # Logique de contrôle
+   ├── routes/
+   │   └── [nom-api].js      # Définition des routes
+   └── services/
+       └── [nom-api].js      # Logique métier
+   ```
+   L'absence d'un de ces fichiers peut causer une erreur 500.
+
+2. **Vérifications** :
+   - Tous les fichiers sont présents
+   - Le nom du modèle est cohérent dans tous les fichiers
+   - Les permissions sont configurées dans l'admin Strapi
+   - Les relations sont correctement définies dans schema.json
+
+3. **Solution typique** :
+   - Créer les fichiers manquants
+   - Redémarrer le serveur Strapi
+   - Vérifier les logs pour d'autres erreurs potentielles 
