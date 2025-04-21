@@ -1,39 +1,95 @@
+export interface StrapiResponse<T> {
+  data: T;
+  meta: {
+    pagination?: {
+      page: number;
+      pageSize: number;
+      pageCount: number;
+      total: number;
+    };
+  };
+}
+
+export interface StrapiEntity<T> {
+  id: number;
+  attributes: T;
+}
+
 export interface User {
-  id: string;
-  name: string;
-  teams: Team[];
+  id: number;
+  username: string;
+  email: string;
 }
 
 export interface Team {
-  id: string;
+  id: number;
   name: string;
   color: string;
-  members: User[];
+  users?: User[];
+  votes?: Vote[];
 }
 
 export interface Resource {
-  id: string;
+  id: number;
   title: string;
-  url: string;
-  image?: string;
-  description: string;
-  createdAt: Date;
-  author: User;
+  content: string;
+  date: string;
+  location: string;
+  status: 'draft' | 'published';
+  imageUrl: string | null;
+  link: string | null;
+  category: {
+    id: number;
+    name: string;
+    description: string;
+  };
+  votes: Vote[];
 }
 
 export interface Vote {
-  id: string;
-  resourceId: string;
-  teamId: string;
-  userId: string;
+  id: number;
   value: number;
+  user: {
+    id: number;
+    username: string;
+  };
+  resource: {
+    id: number;
+    title: string;
+  };
+  team: {
+    id: number;
+    name: string;
+    color: string;
+  };
 }
 
 export interface Comment {
-  id: string;
-  content: string;
-  resourceId: string;
-  author: User;
-  team: Team;
-  createdAt: Date;
+  id: number;
+  attributes: {
+    content: string;
+    createdAt: string;
+    updatedAt: string;
+    resource?: {
+      data: StrapiEntity<Resource>;
+    };
+    team?: {
+      data: StrapiEntity<Team>;
+    };
+    user?: {
+      data: StrapiEntity<User>;
+    };
+  };
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  description: string;
+  resources?: Resource[];
+}
+
+export interface AuthResponse {
+  jwt: string;
+  user: User;
 } 

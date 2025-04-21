@@ -4,7 +4,7 @@
 
 ### Contexte du Projet
 
-InMemory est une plateforme collaborative permettant aux équipes de partager et d'organiser des ressources (articles, tutoriels, outils, etc.). Chaque équipe peut voter pour les ressources qu'elle trouve utiles et laisser des commentaires. L'objectif est de créer une base de connaissances partagée et organisée par les équipes.
+InMemory est une plateforme collaborative permettant aux équipes de partager et d'organiser des ressources (articles, tutoriels, outils, etc.). Chaque équipe peut voter pour les ressources qu'elle trouve utiles. L'objectif est de créer une base de connaissances partagée et organisée par les équipes.
 
 ### Architecture Technique
 
@@ -38,28 +38,19 @@ InMemory est une plateforme collaborative permettant aux équipes de partager et
 ```typescript
 interface Resource {
   id: number;
-  attributes: {
-    title: string;
+  title: string;
+  content: string;
+  date: string;
+  location: string;
+  status: 'draft' | 'published';
+  imageUrl: string | null;
+  link: string | null;
+  category: {
+    id: number;
+    name: string;
     description: string;
-    imageUrl: string;
-    link: string;
-    createdAt: string;
-    updatedAt: string;
-    category?: {
-      data: {
-        id: number;
-        attributes: {
-          name: string;
-        };
-      };
-    };
-    votes?: {
-      data: StrapiEntity<Vote>[];
-    };
-    comments?: {
-      data: StrapiEntity<Comment>[];
-    };
   };
+  votes: Vote[];
 }
 ```
 
@@ -67,21 +58,10 @@ interface Resource {
 ```typescript
 interface Team {
   id: number;
-  attributes: {
-    name: string;
-    color: string;
-    createdAt: string;
-    updatedAt: string;
-    users?: {
-      data: StrapiEntity<User>[];
-    };
-    comments?: {
-      data: StrapiEntity<Comment>[];
-    };
-    votes?: {
-      data: StrapiEntity<Vote>[];
-    };
-  };
+  name: string;
+  color: string;
+  users?: User[];
+  votes?: Vote[];
 }
 ```
 
@@ -89,40 +69,19 @@ interface Team {
 ```typescript
 interface Vote {
   id: number;
-  attributes: {
-    value: number;
-    createdAt: string;
-    updatedAt: string;
-    resource?: {
-      data: StrapiEntity<Resource>;
-    };
-    team?: {
-      data: StrapiEntity<Team>;
-    };
-    user?: {
-      data: StrapiEntity<User>;
-    };
+  value: number;
+  user: {
+    id: number;
+    username: string;
   };
-}
-```
-
-### Comment (Commentaire)
-```typescript
-interface Comment {
-  id: number;
-  attributes: {
-    content: string;
-    createdAt: string;
-    updatedAt: string;
-    resource?: {
-      data: StrapiEntity<Resource>;
-    };
-    team?: {
-      data: StrapiEntity<Team>;
-    };
-    user?: {
-      data: StrapiEntity<User>;
-    };
+  resource: {
+    id: number;
+    title: string;
+  };
+  team: {
+    id: number;
+    name: string;
+    color: string;
   };
 }
 ```
@@ -131,14 +90,9 @@ interface Comment {
 ```typescript
 interface Category {
   id: number;
-  attributes: {
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-    resources?: {
-      data: StrapiEntity<Resource>[];
-    };
-  };
+  name: string;
+  description: string;
+  resources?: Resource[];
 }
 ```
 
@@ -154,231 +108,120 @@ Carte individuelle pour une ressource.
 - Props :
   - `resource: Resource` : Données de la ressource
   - `onClick: () => void` : Fonction appelée lors du clic
+- Fonctionnalités :
+  - Affichage du statut (brouillon/publié)
+  - Gestion des images avec fallback
+  - Affichage des votes
+  - Formatage des dates
+  - Gestion des données manquantes
 
 ### ResourceModal
 Modal affichant les détails d'une ressource.
 - Props :
   - `resource: Resource` : Ressource à afficher en détail
   - `onClose: () => void` : Fonction de fermeture
+- Fonctionnalités :
+  - Vue détaillée de la ressource
+  - Affichage des votes par équipe
+  - Lien externe vers la ressource
+  - Description de la catégorie
 
 ## API Endpoints
 
 ### Authentification
 ```typescript
-const authResponse = await fetch(`${strapiUrl}/api/auth/local`, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    identifier: process.env.NEXT_PUBLIC_STRAPI_USERNAME,
-    password: process.env.NEXT_PUBLIC_STRAPI_PASSWORD,
-  }),
-});
+POST /api/auth/local
+Body: {
+  identifier: string;
+  password: string;
+}
 ```
 
 ### Ressources
 ```typescript
 // Liste des ressources avec pagination
-GET /api/resources?populate=*&pagination[page]=${page}&pagination[pageSize]=${pageSize}
+GET /api/resources?pagination[page]=${page}&pagination[pageSize]=${pageSize}
 
 // Ressource unique
-GET /api/resources/${id}?populate=*
+GET /api/resources/${id}
 ```
 
 ### Catégories
 ```typescript
 // Liste des catégories
-GET /api/categories?populate=*
+GET /api/categories
 ```
 
-## Configuration
+### Votes
+```typescript
+// Liste des votes
+GET /api/votes
 
-### Variables d'Environnement
-```env
-NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
-NEXT_PUBLIC_STRAPI_USERNAME=your_username
-NEXT_PUBLIC_STRAPI_PASSWORD=your_password
+// Créer un vote
+POST /api/votes
 ```
 
-## Configuration des Utilisateurs dans Strapi
+## Bonnes Pratiques
 
-### Types d'Utilisateurs dans Strapi
-
-Strapi distingue deux types d'utilisateurs différents :
-
-1. **Les utilisateurs administrateurs** (Admin Users)
-   - Accèdent à l'interface d'administration de Strapi
-   - Ont des rôles comme : Super Admin, Editor, Author
-   - Utilisent l'endpoint `/admin/login` pour s'authentifier
-   - Ne doivent PAS être utilisés pour l'API publique
-
-2. **Les utilisateurs de l'API** (API Users)
-   - Utilisent l'application front-end
-   - Ont des rôles comme : Authenticated, Public
-   - Utilisent l'endpoint `/api/auth/local` pour s'authentifier
-   - Sont les utilisateurs à créer pour l'application
-
-### Configuration des Utilisateurs API
-
-#### 1. Vérifier les Rôles API
-Dans Settings > Users & Permissions Plugin > Roles, vous trouverez deux sections :
-
-- Les rôles d'administration (Super Admin, Editor, Author)
-- Les rôles d'API (Authenticated, Public)
-
-#### 2. Configurer le Rôle "Authenticated"
-1. Cliquer sur le rôle "Authenticated"
-2. Activer les permissions nécessaires :
-   - Resources : find, findOne
-   - Categories : find, findOne
-3. Sauvegarder les modifications
-
-#### 3. Créer un Utilisateur API
-1. Aller dans Content Manager > Collection Types > User
-2. Cliquer sur "Create new entry"
-3. Remplir les informations :
-   - Username
-   - Email
-   - Password
-4. Sauvegarder
-
-#### 4. Configuration Front-end
-Dans le fichier `.env.local` du projet Next.js, utiliser les credentials de l'utilisateur API créé :
-
-```env
-NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
-NEXT_PUBLIC_STRAPI_USERNAME=votre_email@example.com
-NEXT_PUBLIC_STRAPI_PASSWORD=votre_mot_de_passe
+### Gestion des Données Manquantes
+```typescript
+// Utilisation de valeurs par défaut
+const title = resource.title || 'Sans titre';
+const location = resource.location || 'Lieu inconnu';
 ```
 
-### Important
-- Ne jamais utiliser le compte Super Admin pour l'authentification API
-- Toujours créer un utilisateur API distinct pour l'application front-end
-- Le rôle "Authenticated" est automatiquement attribué aux utilisateurs API créés
-
-### Troubleshooting
-Si vous recevez une erreur "Invalid identifier or password" :
-1. Vérifier que vous utilisez bien les credentials d'un utilisateur API (pas admin)
-2. Vérifier que l'endpoint utilisé est `/api/auth/local` (pas `/admin/login`)
-3. Vérifier que les permissions sont correctement configurées pour le rôle "Authenticated"
-
-## Gestion des Images
-
-Les images des ressources sont gérées via l'URL directe (`imageUrl`). Assurez-vous que les URLs sont accessibles publiquement.
-
-## Sécurité
-
-- Les identifiants Strapi sont stockés dans les variables d'environnement
-- L'authentification utilise JWT
-- Les tokens sont stockés de manière sécurisée
-- Les requêtes API utilisent HTTPS en production
-
-## Performance
-
-- Utilisation de Next.js pour le rendu côté serveur
-- Optimisation des images via Next.js Image
-- Mise en cache des requêtes API
-- Pagination des ressources
-
-## Tests
-
-Pour lancer les tests :
-```bash
-npm run test
+### Gestion des États
+```typescript
+// États de chargement et d'erreur
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState<string | null>(null);
 ```
 
-## Déploiement
-
-1. Construire l'application :
-```bash
-npm run build
+### Logs en Développement
+```typescript
+console.log("=== DÉBUT DU CHARGEMENT ===");
+console.log("Structure complète:", JSON.stringify(data, null, 2));
+console.log("=== FIN DU CHARGEMENT ===");
 ```
 
-2. Démarrer en production :
-```bash
-npm run start
-```
+## Leçons Apprises
 
-## Débogage et Configuration Initiale
+1. **Architecture des Données**
+   - Simplification de la structure des données
+   - Utilisation efficace de TypeScript
+   - Gestion robuste des cas d'erreur
 
-### Vérification de l'Authentification
-Pour tester l'authentification API manuellement :
-```bash
-curl -X POST http://localhost:1337/api/auth/local -H "Content-Type: application/json" -d '{
-  "identifier": "votre_email@example.com",
-  "password": "votre_mot_de_passe"
-}'
-```
+2. **Communication Inter-équipes**
+   - Documentation claire des changements
+   - Tests réguliers des intégrations
+   - Feedback rapide sur les problèmes
 
-Une réponse réussie contient un JWT et les informations utilisateur :
-```json
-{
-  "jwt": "votre.jwt.token",
-  "user": {
-    "id": 1,
-    "username": "username",
-    "email": "email@example.com"
-    // ...
-  }
-}
-```
+3. **UI/UX**
+   - Design responsive
+   - Gestion des états de chargement
+   - Feedback visuel pour l'utilisateur
 
-### Configuration Initiale des Données
+## Prochaines Évolutions
 
-Pour que l'application fonctionne correctement, il faut initialiser des données dans Strapi :
+1. **Fonctionnalités**
+   - Système de votes complet
+   - Filtrage par catégorie
+   - Recherche avancée
+   - Tri des ressources
 
-1. **Créer une Catégorie** :
-   - Accéder à Content Manager > Categories
-   - Cliquer sur "Create new entry"
-   - Remplir :
-     - name: Nom de la catégorie (ex: "Documentation")
-   - Publier la catégorie
+2. **Optimisations**
+   - Mise en cache des données
+   - Chargement progressif
+   - Optimisation des images
 
-2. **Créer une Ressource** :
-   - Accéder à Content Manager > Resources
-   - Cliquer sur "Create new entry"
-   - Remplir :
-     - title: Titre de la ressource
-     - description: Description détaillée
-     - imageUrl: URL de l'image représentative
-     - link: Lien vers la ressource
-     - category: Sélectionner une catégorie créée précédemment
-   - Publier la ressource
-
-### Résolution des Problèmes Courants
-
-1. **Message "Chargement..." persistant** :
-   - Vérifier que Strapi est en cours d'exécution sur le port 1337
-   - Vérifier les credentials dans `.env.local`
-   - Vérifier qu'il existe des données dans Strapi (ressources et catégories)
-   - Consulter les logs dans la console du navigateur
-
-2. **Erreur "Invalid identifier or password"** :
-   - Vérifier que vous utilisez l'email comme identifiant (pas le username)
-   - Vérifier que l'utilisateur est bien un utilisateur API (pas un admin)
-   - Vérifier les permissions du rôle "Authenticated"
-
-3. **Aucune donnée affichée** :
-   - Vérifier les permissions du rôle "Authenticated" pour Resources et Categories
-   - Vérifier que les ressources et catégories sont publiées dans Strapi
-   - Vérifier les relations entre les ressources et les catégories
-
-### Commandes Utiles pour le Développement
-
-```bash
-# Vérifier l'état de l'API
-curl http://localhost:1337/api/resources?populate=*
-
-# Vérifier les catégories
-curl http://localhost:1337/api/categories?populate=*
-
-# Tester l'authentification
-curl -X POST http://localhost:1337/api/auth/local \
-  -H "Content-Type: application/json" \
-  -d '{"identifier":"email@example.com","password":"password"}'
-```
+3. **Maintenance**
+   - Tests automatisés
+   - Documentation continue
+   - Monitoring des performances
 
 ## Contact
 
-Pour toute question ou clarification, n'hésitez pas à contacter l'équipe frontend.
+Pour toute question technique :
+- Frontend : [Équipe Frontend]
+- Backend : [Équipe Backend]
+- Design : [Équipe Design]

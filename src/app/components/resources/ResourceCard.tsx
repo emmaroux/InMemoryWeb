@@ -9,15 +9,20 @@ interface ResourceCardProps {
 }
 
 export default function ResourceCard({ resource, teams, votes, comments }: ResourceCardProps) {
+  // Fonction pour trouver l'équipe correspondant à un teamId
+  const getTeamById = (teamId: string): Team | undefined => {
+    return teams.find(team => team.id === teamId);
+  };
+
   return (
     <div className="border rounded-lg overflow-hidden shadow-lg bg-white">
       {/* En-tête de la ressource */}
       <div className="p-4">
         <h3 className="text-xl font-bold mb-2">{resource.title}</h3>
-        {resource.image && (
+        {resource.imageUrl && (
           <div className="relative h-48 mb-4">
             <Image
-              src={resource.image}
+              src={resource.imageUrl}
               alt={resource.title}
               fill
               className="object-cover"
@@ -25,7 +30,7 @@ export default function ResourceCard({ resource, teams, votes, comments }: Resou
           </div>
         )}
         <p className="text-gray-600">{resource.description}</p>
-        <a href={resource.url} 
+        <a href={resource.link} 
            target="_blank" 
            rel="noopener noreferrer"
            className="text-blue-500 hover:underline">
@@ -58,24 +63,31 @@ export default function ResourceCard({ resource, teams, votes, comments }: Resou
       <div className="border-t p-4">
         <h4 className="font-semibold mb-2">Commentaires :</h4>
         <div className="space-y-2">
-          {comments.map(comment => (
-            <div
-              key={comment.id}
-              className="p-2 rounded"
-              style={{ backgroundColor: `${comment.team.color}10` }}
-            >
-              <div className="flex items-center gap-2">
-                <span className="font-medium">{comment.author.name}</span>
-                <span
-                  className="px-2 py-0.5 rounded-full text-xs"
-                  style={{ backgroundColor: comment.team.color, color: 'white' }}
-                >
-                  {comment.team.name}
+          {comments.map(comment => {
+            const team = getTeamById(comment.teamId);
+            return (
+              <div
+                key={comment.id}
+                className="p-2 rounded"
+                style={{ backgroundColor: team ? `${team.color}10` : '#f0f0f0' }}
+              >
+                <div className="flex items-center gap-2">
+                  {team && (
+                    <span
+                      className="px-2 py-0.5 rounded-full text-xs"
+                      style={{ backgroundColor: team.color, color: 'white' }}
+                    >
+                      {team.name}
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1 text-gray-700">{comment.content}</p>
+                <span className="text-xs text-gray-500">
+                  {new Date(comment.createdAt).toLocaleDateString()}
                 </span>
               </div>
-              <p className="mt-1 text-gray-700">{comment.content}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

@@ -1,3 +1,5 @@
+'use client';
+
 import { Resource } from '@/app/types';
 import Image from 'next/image';
 
@@ -7,45 +9,58 @@ interface ResourceGridItemProps {
 }
 
 export default function ResourceGridItem({ resource, onClick }: ResourceGridItemProps) {
-  const generatePlaceholderColor = () => {
-    const colors = [
-      'from-blue-500 to-purple-600',
-      'from-emerald-500 to-teal-600',
-      'from-rose-500 to-pink-600',
-      'from-amber-500 to-orange-600',
-      'from-indigo-500 to-violet-600'
-    ];
-    return colors[Math.floor(Math.random() * colors.length)];
-  };
+  const totalVotes = resource.votes?.length || 0;
+  const categoryName = resource.category?.name || 'Non catégorisé';
 
   return (
-    <div 
-      className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group"
+    <article 
+      className="max-w-[300px] bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow duration-300"
       onClick={onClick}
     >
-      <div className="relative aspect-[16/10] overflow-hidden">
-        {resource.image ? (
+      <div className="relative h-40">
+        {resource.imageUrl ? (
           <Image
-            src={resource.image}
+            src={resource.imageUrl}
             alt={resource.title}
             fill
-            sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, (max-width: 1440px) 30vw, 23vw"
-            className="object-cover transform group-hover:scale-[1.02] transition-transform duration-500"
-            priority
+            className="object-cover"
           />
         ) : (
-          <div className={`w-full h-full bg-gradient-to-br ${generatePlaceholderColor()} flex items-center justify-center`}>
-            <span className="text-white text-3xl font-bold opacity-80">
-              {resource.title.charAt(0)}
-            </span>
+          <div 
+            className="w-full h-full flex items-center justify-center bg-gray-100"
+          >
+            <span className="text-gray-400">{resource.location || 'Aucune localisation'}</span>
           </div>
         )}
       </div>
-      <div className="p-6">
-        <h3 className="text-xl font-bold leading-tight text-gray-900 group-hover:text-blue-600 transition-colors">
-          {resource.title}
+
+      <div className="p-4">
+        <h3 className="text-[0.9rem] font-semibold mb-2 line-clamp-2">
+          {resource.title || 'Sans titre'}
         </h3>
+        <p className="text-[0.8rem] text-gray-600 mb-2 line-clamp-2">
+          {resource.content || 'Aucun contenu'}
+        </p>
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-between items-center">
+            <span className="text-[0.75rem] px-2 py-1 bg-gray-100 rounded-full">
+              {categoryName}
+            </span>
+            <span className="text-[0.8rem] font-medium">
+              {totalVotes} vote{totalVotes !== 1 ? 's' : ''}
+            </span>
+          </div>
+          <div className="flex justify-between items-center text-[0.75rem] text-gray-500">
+            <span>{resource.date ? new Date(resource.date).toLocaleDateString() : 'Date inconnue'}</span>
+            <span>{resource.location || 'Lieu inconnu'}</span>
+          </div>
+          {resource.status === 'draft' && (
+            <span className="text-[0.75rem] text-amber-600 bg-amber-50 px-2 py-1 rounded-full self-start">
+              Brouillon
+            </span>
+          )}
+        </div>
       </div>
-    </div>
+    </article>
   );
 } 
