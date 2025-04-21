@@ -35,10 +35,21 @@ export interface Resource {
   title: string;
   imageUrl: string | null;
   link: string | null;
+  description: string | null;
   createdAt: string;
   updatedAt: string;
   publishedAt: string;
-  description: string | null;
+  votes?: any[];
+  category?: {
+    id: number;
+    name: string;
+    documentId: string;
+    createdAt: string;
+    updatedAt: string;
+    publishedAt: string;
+    locale: string | null;
+  } | null;
+  comments?: any[];
 }
 
 export interface Vote {

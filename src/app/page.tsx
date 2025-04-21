@@ -16,79 +16,113 @@ export default function Home() {
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoadingState('auth');
+      setLoadingState('resources');
+      const strapiUrl = "http://localhost:1337";
       try {
-        const strapiUrl = "http://localhost:1337";
-        
-        // Authentification via l'API publique
-        const authBody = {
-          identifier: "emmanuelle.roux@gmail.com",
-          password: "ER4567ty#"
-        };
-
-        const authResponse = await fetch(`${strapiUrl}/api/auth/local`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(authBody),
-        });
-
-        const authData = await authResponse.json();
-        
-        if (!authResponse.ok) {
-          throw new Error(`Erreur lors de l'authentification: ${JSON.stringify(authData)}`);
-        }
-
-        const token = authData.jwt;
-        const headers: HeadersInit = {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        };
-
         // Récupérer les ressources
-        setLoadingState('resources');
-        try {
-          const resourcesUrl = `${strapiUrl}/api/resources?pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}`;
-          const resourcesResponse = await fetch(resourcesUrl, { headers });
-          
-          if (!resourcesResponse.ok) {
-            const resourceError = await resourcesResponse.json();
-            throw new Error(`Erreur lors de la récupération des ressources: ${JSON.stringify(resourceError)}`);
-          }
-          
-          const resourcesData = await resourcesResponse.json();
-          setResources(resourcesData.data || []);
-          setTotalItems(resourcesData.meta?.pagination?.total || 0);
-          setResourcesError(null);
-        } catch (err) {
-          setResourcesError(err instanceof Error ? err.message : 'Erreur lors de la récupération des ressources');
+        const resourcesUrl = `${strapiUrl}/api/resources?pagination[page]=${currentPage}&pagination[pageSize]=${pageSize}`;
+        console.log('URL de requête resources:', resourcesUrl);
+        const resourcesResponse = await fetch(resourcesUrl);
+        
+        if (!resourcesResponse.ok) {
+          const resourceError = await resourcesResponse.json();
+          throw new Error(`Erreur lors de la récupération des ressources: ${JSON.stringify(resourceError)}`);
         }
-
-        // Récupérer les catégories
-        setLoadingState('categories');
-        try {
-          const categoriesUrl = `${strapiUrl}/api/categories?pagination[page]=1&pagination[pageSize]=100&populate=resources`;
-          const categoriesResponse = await fetch(categoriesUrl, { headers });
-          
-          if (!categoriesResponse.ok) {
-            const categoryError = await categoriesResponse.json();
-            throw new Error(`Erreur lors de la récupération des catégories: ${JSON.stringify(categoryError)}`);
-          }
-          
-          const categoriesData = await categoriesResponse.json();
-          setCategories(categoriesData.data);
-          setCategoriesError(null);
-        } catch (err) {
-          setCategoriesError(err instanceof Error ? err.message : 'Erreur lors de la récupération des catégories');
-        }
-
-        setLoadingState('complete');
+        
+        const resourcesData = await resourcesResponse.json();
+        console.log('Nombre de ressources:', resourcesData.data?.length || 0);
+        
+        // Resources de base
+        const resourcesWithoutRelations = resourcesData.data?.map((resource: any) => ({
+          id: resource.id,
+          title: resource.title || 'Sans titre',
+          description: resource.description || 'Aucune description',
+          imageUrl: resource.imageUrl,
+          link: resource.link,
+          documentId: resource.documentId,
+          createdAt: resource.createdAt,
+          updatedAt: resource.updatedAt,
+          publishedAt: resource.publishedAt,
+          category: null,
+          votes: [],
+          comments: []
+        })) || [];
+        
+        // Récupérer les relations pour chaque ressource
+        const resourcesWithRelations = await Promise.all(
+          resourcesWithoutRelations.map(async (resource) => {
+            // Récupérer les votes
+            try {
+              const votesUrl = `${strapiUrl}/api/votes?filters[resource][id][$eq]=${resource.id}`;
+              const votesResponse = await fetch(votesUrl);
+              if (votesResponse.ok) {
+                const votesData = await votesResponse.json();
+                resource.votes = votesData.data || [];
+              }
+            } catch (err) {
+              console.error(`Erreur votes pour la ressource ${resource.id}:`, err);
+            }
+            
+            // Récupérer la catégorie
+            try {
+              const categoryUrl = `${strapiUrl}/api/categories?filters[resources][id][$eq]=${resource.id}`;
+              const categoryResponse = await fetch(categoryUrl);
+              if (categoryResponse.ok) {
+                const categoryData = await categoryResponse.json();
+                if (categoryData.data?.results && categoryData.data.results.length > 0) {
+                  resource.category = categoryData.data.results[0];
+                }
+              }
+            } catch (err) {
+              console.error(`Erreur catégorie pour la ressource ${resource.id}:`, err);
+            }
+            
+            // Récupérer les commentaires
+            try {
+              const commentsUrl = `${strapiUrl}/api/comments?filters[resource][id][$eq]=${resource.id}`;
+              const commentsResponse = await fetch(commentsUrl);
+              if (commentsResponse.ok) {
+                const commentsData = await commentsResponse.json();
+                resource.comments = commentsData.data || [];
+              }
+            } catch (err) {
+              console.error(`Erreur commentaires pour la ressource ${resource.id}:`, err);
+            }
+            
+            return resource;
+          })
+        );
+        
+        setResources(resourcesWithRelations);
+        setTotalItems(resourcesData.meta?.pagination?.total || 0);
+        setResourcesError(null);
       } catch (err) {
-        setResourcesError(err instanceof Error ? err.message : 'Erreur lors de l\'authentification');
-        setCategoriesError(err instanceof Error ? err.message : 'Erreur lors de l\'authentification');
-        setLoadingState('error');
+        setResourcesError(err instanceof Error ? err.message : 'Erreur lors de la récupération des ressources');
       }
+
+      // Récupérer les catégories (pour la liste des filtres)
+      setLoadingState('categories');
+      try {
+        const categoriesUrl = `${strapiUrl}/api/categories`;
+        const categoriesResponse = await fetch(categoriesUrl);
+        
+        if (!categoriesResponse.ok) {
+          const categoryError = await categoriesResponse.json();
+          throw new Error(`Erreur lors de la récupération des catégories: ${JSON.stringify(categoryError)}`);
+        }
+        
+        const categoriesData = await categoriesResponse.json();
+        if (categoriesData.data?.results) {
+          setCategories(categoriesData.data.results);
+        } else {
+          setCategories(categoriesData.data || []);
+        }
+        setCategoriesError(null);
+      } catch (err) {
+        setCategoriesError(err instanceof Error ? err.message : 'Erreur lors de la récupération des catégories');
+      }
+
+      setLoadingState('complete');
     };
 
     fetchData();
