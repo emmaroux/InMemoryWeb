@@ -31,19 +31,14 @@ export interface Team {
 
 export interface Resource {
   id: number;
+  documentId: string;
   title: string;
-  content: string;
-  date: string;
-  location: string;
-  status: 'draft' | 'published';
   imageUrl: string | null;
   link: string | null;
-  category: {
-    id: number;
-    name: string;
-    description: string;
-  };
-  votes: Vote[];
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string;
+  description: string | null;
 }
 
 export interface Vote {
