@@ -2,6 +2,7 @@
 
 import { Resource, Vote } from '../../types';
 import Image from 'next/image';
+import { useState } from 'react';
 
 interface ResourceGridItemProps {
   resource: Resource;
@@ -32,6 +33,8 @@ const getRandomColor = (text: string): string => {
 };
 
 export default function ResourceGridItem({ resource, onClick }: ResourceGridItemProps) {
+  const [imageError, setImageError] = useState(false);
+  
   const date = new Date(resource.publishedAt);
   const formattedDate = date.toLocaleDateString('fr-FR', {
     day: 'numeric',
@@ -53,13 +56,14 @@ export default function ResourceGridItem({ resource, onClick }: ResourceGridItem
       className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transform transition-transform duration-200 hover:scale-105"
       onClick={onClick}
     >
-      {resource.imageUrl ? (
+      {resource.imageUrl && !imageError ? (
         <div className="relative h-48 w-full">
           <Image
             src={resource.imageUrl}
             alt={resource.title}
             fill
             className="object-cover"
+            onError={() => setImageError(true)}
           />
         </div>
       ) : (

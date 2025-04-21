@@ -39,32 +39,56 @@ export interface Resource {
   createdAt: string;
   updatedAt: string;
   publishedAt: string;
-  votes?: any[];
+  votes?: Array<{
+    id: number;
+    documentId: string;
+    value: number;
+    createdAt: string;
+    team?: {
+      id: number;
+      documentId: string;
+      name: string;
+      color: string;
+    } | null;
+    user?: {
+      id: number;
+      documentId: string;
+      username: string;
+    } | null;
+  }>;
   category?: {
     id: number;
-    name: string;
     documentId: string;
+    name: string;
     createdAt: string;
     updatedAt: string;
     publishedAt: string;
-    locale: string | null;
   } | null;
-  comments?: any[];
+  comments?: Array<{
+    id: number;
+    documentId: string;
+    content: string;
+    createdAt: string;
+  }>;
 }
 
 export interface Vote {
   id: number;
+  documentId: string;
   value: number;
   user: {
     id: number;
+    documentId: string;
     username: string;
   };
   resource: {
     id: number;
+    documentId: string;
     title: string;
   };
   team: {
     id: number;
+    documentId: string;
     name: string;
     color: string;
   };
@@ -72,26 +96,31 @@ export interface Vote {
 
 export interface Comment {
   id: number;
-  attributes: {
-    content: string;
-    createdAt: string;
-    updatedAt: string;
-    resource?: {
-      data: StrapiEntity<Resource>;
-    };
-    team?: {
-      data: StrapiEntity<Team>;
-    };
-    user?: {
-      data: StrapiEntity<User>;
-    };
+  documentId: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  resource?: Resource;
+  team?: {
+    id: number;
+    documentId: string;
+    name: string;
+  };
+  user?: {
+    id: number;
+    documentId: string;
+    username: string;
   };
 }
 
 export interface Category {
   id: number;
+  documentId: string;
   name: string;
   description: string;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string;
   resources?: Resource[];
 }
 

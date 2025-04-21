@@ -9,6 +9,7 @@ Une application web moderne construite avec Next.js 14, React 18, et Tailwind CS
 - **Tailwind CSS 3.4.1** - Framework CSS utilitaire
 - **TypeScript** - Typage statique
 - **Police Geist** - Police système moderne
+- **Strapi** - Headless CMS pour la gestion des données
 
 ## 🛠 Installation
 
@@ -42,6 +43,84 @@ const geistMono = GeistMono;
   - Hauteur maximale : 140px
   - Tailles de police optimisées pour la lisibilité
 
+### Intégration avec l'API Strapi
+
+L'application utilise une API Strapi pour récupérer les données des ressources, catégories, votes et commentaires. L'intégration avec l'API présente quelques particularités :
+
+#### Format de Données à Plat
+
+Contrairement au format standard Strapi v5 qui utilise une structure d'attributs imbriqués, l'API utilisée renvoie un format de données "à plat" :
+
+```javascript
+// Format standard Strapi v5 (avec attributes imbriqués)
+{
+  "data": [{
+    "id": 1,
+    "attributes": {
+      "title": "Titre de la ressource",
+      "description": "Description...",
+      "category": {
+        "data": {
+          "id": 1,
+          "attributes": { "name": "Catégorie" }
+        }
+      }
+    }
+  }]
+}
+
+// Format à plat utilisé dans ce projet
+{
+  "data": [{
+    "id": 1,
+    "title": "Titre de la ressource",
+    "description": "Description...",
+    "category": {
+      "id": 1,
+      "name": "Catégorie"
+    }
+  }]
+}
+```
+
+#### Transformation des Données
+
+Dans le fichier `src/app/page.tsx`, nous avons implémenté une transformation des données pour s'adapter à ce format :
+
+```typescript
+formattedResources = resourcesData.data.map((item: any) => ({
+  id: item.id,
+  documentId: item.documentId || `resource-${item.id}`,
+  title: item.title || '',
+  description: item.description || '',
+  // ... autres propriétés
+  category: item.category ? {
+    id: item.category.id,
+    name: item.category.name || '',
+    // ... autres propriétés de la catégorie
+  } : null,
+}));
+```
+
+#### Configuration des Images
+
+Les images distantes sont configurées dans `next.config.js` pour autoriser les domaines :
+
+```javascript
+images: {
+  remotePatterns: [
+    {
+      protocol: 'https',
+      hostname: 'example.com',
+      port: '',
+      pathname: '/**',
+    },
+  ],
+},
+```
+
+Pour gérer les erreurs de chargement des images, un état `imageError` a été ajouté dans les composants `ResourceGridItem` et `ResourceModal` afin d'afficher un placeholder avec les initiales du titre en cas d'échec.
+
 ### Données Mock
 
 Les données de test sont importées depuis `./data/mockData` et incluent :
@@ -67,6 +146,8 @@ Les données de test sont importées depuis `./data/mockData` et incluent :
 2. Les cartes de ressources sont limitées en taille pour une meilleure expérience utilisateur
 
 3. L'application utilise les dernières versions stables des dépendances pour éviter les problèmes de compatibilité
+
+4. Pour utiliser l'API en local, assurez-vous que le serveur Strapi est en cours d'exécution sur `http://localhost:1337`
 
 ## 📦 Dépendances Principales
 
